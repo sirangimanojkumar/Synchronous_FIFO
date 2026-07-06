@@ -24,35 +24,48 @@ Synchronous FIFOs are simpler to design and verify because there is no metastabi
 - ✅ Easily testable with a simple self-checking testbench
 
 ---
-
+ 
 ## Block Diagram
+ 
+```mermaid
+graph TD
+    %% Define block styles
+    classDef mem fill:#d4e6f1,stroke:#1b4f72,stroke-width:2px,color:#000;
+    classDef logic fill:#e8f8f5,stroke:#117a65,stroke-width:2px,color:#000;
+    classDef flags fill:#fdebd0,stroke:#b9770e,stroke-width:2px,color:#000;
+    classDef signal fill:none,stroke:none,color:#000;
 
+    %% Elements
+    wr_data[wr_data]:::signal
+    rd_data[rd_data]:::signal
+    full[full]:::signal
+    empty[empty]:::signal
+
+    MEM["Memory Array<br>(Depth x Width)"]:::mem
+    WP["Write Pointer Logic"]:::logic
+    RP["Read Pointer Logic"]:::logic
+    FE["Full / Empty Logic"]:::flags
+
+    %% Connections
+    wr_data --> MEM
+    MEM --> rd_data
+
+    WP -->|wr_ptr write| MEM
+    RP -->|rd_ptr read| MEM
+
+    WP --> FE
+    RP --> FE
+
+    FE --> full
+    FE --> empty
+
+    %% Caption
+    subgraph Note [" "]
+        direction LR
+        caption["(all driven by a single clk)"]:::signal
+    end
+    style Note fill:none,stroke:none;
 ```
-                ┌─────────────────────────────────────────┐
-                │                                         │
-   wr_data ───▶ │              Memory Array               │ ───▶ rd_data
-                │            (Depth x Width)               │
-                │                                         │
-                └─────────────────────────────────────────┘
-                       ▲                        ▲
-                       │                        │
-                 wr_ptr (write)           rd_ptr (read)
-                       │                        │
-        ┌──────────────┴────────┐   ┌───────────┴──────────┐
-        │   Write Pointer Logic │   │   Read Pointer Logic  │
-        └──────────────┬────────┘   └───────────┬──────────┘
-                       │                        │
-                       └──────────┬─────────────┘
-                                  ▼
-                       ┌────────────────────┐
-                       │  Full / Empty Logic │
-                       └────────────────────┘
-                                  │
-                          full ◄──┴──► empty
-
-                     (all driven by a single clk)
-```
-
 ---
 
 ## Logic Explanation
